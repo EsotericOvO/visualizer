@@ -7,7 +7,7 @@ dustCanvas.height = window.innerHeight;
 
 let particles = [];
 let lastParticleSpawnTime = 0;
-const particleSpawnInterval = 300;
+const particleSpawnInterval = 200;
 
 fileInput.addEventListener("change", (e) => {
   const file = fileInput.files[0];
@@ -34,7 +34,7 @@ fileInput.addEventListener("change", (e) => {
   const frequencyData = new Uint8Array(analyser.frequencyBinCount);
   const timeDomainData = new Uint8Array(analyser.fftSize);
   let rotation = 0;
-  let currentSize = 200;
+  let currentSize = 400;
   const sizeChangeRate = 0.1;
 
   function animate() {
@@ -44,14 +44,14 @@ fileInput.addEventListener("change", (e) => {
       analyser.getByteTimeDomainData(timeDomainData);
 
       const amplitude = calculateAmplitude(timeDomainData);
-      const targetSize = 200 + amplitude * 100;
+      const targetSize = 300 + amplitude * 200;
       currentSize += (targetSize - currentSize) * sizeChangeRate;
       circle.style.width = `${currentSize}px`;
       circle.style.height = `${currentSize}px`;
       circle.style.borderRadius = '50%';
 
-      const rotationSpeed = amplitude * 200;
-      rotation += rotationSpeed * 0.03;
+      const rotationSpeed = amplitude * 40**2;
+      rotation += rotationSpeed * 0.005;
       circle.style.transform = `rotate(${rotation}deg)`;
 
       updateDustParticles(amplitude);
@@ -95,8 +95,8 @@ class Particle {
   }
 
   update(amplitude) {
-    const loudnessSpeed = amplitude * 4;
-    this.x += this.baseSpeed / 2 + loudnessSpeed;
+    const loudnessSpeed = amplitude * 14;
+    this.x += this.baseSpeed / 4 + loudnessSpeed;
     this.y += this.verticalSpeed;
     this.alpha -= 0.001;
     if (this.alpha <= 0) this.alpha = 0;
