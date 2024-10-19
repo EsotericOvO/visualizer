@@ -8,7 +8,7 @@ dustCanvas.height = window.innerHeight;
 let particles = [];
 let lastParticleSpawnTime = 0;
 const particleSpawnInterval = 200;
-
+console.log('i have no idea what im doing')
 fileInput.addEventListener("change", (e) => {
   const file = fileInput.files[0];
   const audioContext = new AudioContext();
@@ -44,14 +44,15 @@ fileInput.addEventListener("change", (e) => {
       analyser.getByteTimeDomainData(timeDomainData);
 
       const amplitude = calculateAmplitude(timeDomainData);
+      const { complexity } = calculatePitchComplexity(frequencyData, audioContext);
       const targetSize = 300 + amplitude * 200;
       currentSize += (targetSize - currentSize) * sizeChangeRate;
       circle.style.width = `${currentSize}px`;
       circle.style.height = `${currentSize}px`;
       circle.style.borderRadius = '50%';
-
-      const rotationSpeed = amplitude * 40**2;
-      rotation += rotationSpeed * 0.005;
+      
+      const rotationSpeed = (complexity * 25)*(amplitude*10)**2
+      rotation +=0.1+rotationSpeed/50;
       circle.style.transform = `rotate(${rotation}deg)`;
 
       updateDustParticles(amplitude);
@@ -65,6 +66,29 @@ function calculateAmplitude(timeDomainData) {
     sum += Math.abs(timeDomainData[i] - 128);
   }
   return sum / timeDomainData.length / 128;
+}
+
+function calculatePitchComplexity(frequencyData, audioContext) {
+  let maxIndex = 0;
+  let maxValue = 0;
+  let numHarmonics = 0;
+
+  for (let i = 0; i < frequencyData.length; i++) {
+    if (frequencyData[i] > maxValue) {
+      maxValue = frequencyData[i];
+      maxIndex = i;
+    }
+  }
+
+  for (let i = 0; i < frequencyData.length; i++) {
+    if (i !== maxIndex && frequencyData[i] > maxValue * 0.1) {
+      numHarmonics++;
+    }
+  }
+
+  const complexity = numHarmonics / frequencyData.length;
+
+  return { dominantFrequency: maxIndex * (audioContext.sampleRate / 2) / frequencyData.length, complexity };
 }
 
 function updateDustParticles(amplitude) {
